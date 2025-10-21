@@ -1,0 +1,60 @@
+services:
+  mongo:
+    image: mongo:7
+    restart: unless-stopped
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=0f5pMWmGJndLb43pf9gsG7b4uncOcG
+      - MONGO_INITDB_DATABASE=games_hub
+    container_name: gameshub-mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data_auth:/data/db
+  backend:
+    build: ./backend
+    container_name: gameshub-backend
+    restart: unless-stopped
+    ports:
+      - "6601:4000"
+    environment:
+      - PORT=4000
+      - MONGO_URI=mongodb://root:0f5pMWmGJndLb43pf9gsG7b4uncOcG@mongo:27017/games_hub?authSource=admin
+      - JWT_SECRET=${JWT_SECRET:-change_me}
+      - CORS_ORIGIN=http://localhost:6600,http://localhost:6603
+    depends_on:
+      - mongo
+  frontend:
+    build: ./frontend
+    container_name: gameshub-frontend
+    restart: unless-stopped
+    ports:
+      - "6600:80"
+    depends_on:
+      - backend
+  mongo-express:
+    image: mongo-express:1.0.2-20
+    restart: unless-stopped
+    environment:
+      - ME_CONFIG_MONGODB_ENABLE_ADMIN=true
+      - ME_CONFIG_MONGODB_ADMINUSERNAME=root
+      - ME_CONFIG_MONGODB_ADMINPASSWORD=0f5pMWmGJndLb43pf9gsG7b4uncOcG
+      - ME_CONFIG_MONGODB_URL=mongodb://root:0f5pMWmGJndLb43pf9gsG7b4uncOcG@mongo:27017/?authSource=admin
+      - ME_CONFIG_BASICAUTH_USERNAME=superadmin@games_hub.com
+      - ME_CONFIG_BASICAUTH_PASSWORD=0f5pMWmGJndLb43pf9gsG7b4uncOcG
+    ports:
+      - "6602:8081"
+    container_name: gameshub-mongo-express
+    depends_on:
+      - mongo
+  nginx:
+    build: ./nginx
+    ports:
+      - "6603:80"
+    container_name: gameshub-nginx
+    restart: unless-stopped
+    depends_on:
+      - frontend
+      - backend
+volumes:
+  mongo_data_auth:
