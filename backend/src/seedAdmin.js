@@ -7,6 +7,13 @@ dotenv.config();
 
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://mongo:27017/games_hub';
 
+// Admin seed configuration (env overrides allowed)
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'superadmin@games_hub.com';
+const ADMIN_NAME = process.env.ADMIN_NAME || 'Super Admin';
+const ADMIN_CPF = process.env.ADMIN_CPF || '07401490323';
+const ADMIN_PHONE = process.env.ADMIN_PHONE || '85999848131';
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || '0f5pMWmGJndLb43pf9gsG7b4uncOcG';
+
 async function connectWithRetry(uri, retries = 20, delayMs = 2000) {
     for (let attempt = 1; attempt <= retries; attempt++) {
         try {
@@ -22,24 +29,26 @@ async function connectWithRetry(uri, retries = 20, delayMs = 2000) {
 
 async function main() {
     await connectWithRetry(MONGO_URI);
-    const email = 'superadmin@games_hub.com';
-    const defaultPassword = '0f5pMWmGJndLb43pf9gsG7b4uncOcG';
-
-    const existing = await User.findOne({ email });
-    if (existing) {
-        console.log('Admin já existe:', existing.email);
-        await mongoose.disconnect();
-        return;
+    // Remove any previous conflicting records to allow recreation
+    const removed = await User.deleteMany({
+        $or: [
+            { email: ADMIN_EMAIL },
+            { cpf: ADMIN_CPF },
+            { phone: ADMIN_PHONE },
+        ],
+    });
+    if (removed.deletedCount) {
+        console.log(`Registros antigos removidos: ${removed.deletedCount}`);
     }
-    const passwordHash = await bcrypt.hash(defaultPassword, 10);
+
+    const passwordHash = await bcrypt.hash(ADMIN_PASSWORD, 10);
     const admin = await User.create({
-        firstName: 'super',
-        lastName: 'admin',
-        email: 'superadmin@games_hub.com',
-        cpf: '07401490323',
-        phone: '85999848131',
+        name: ADMIN_NAME,
+        email: ADMIN_EMAIL,
+        cpf: ADMIN_CPF,
+        phone: ADMIN_PHONE,
         passwordHash,
-        role: 'admin'
+        role: 'admin',
     });
     console.log('Admin criado:', admin.email);
     await mongoose.disconnect();

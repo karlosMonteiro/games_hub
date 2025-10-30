@@ -48,9 +48,9 @@ async function sessionGuard(req, res, next) {
 // Register
 router.post('/register', async (req, res) => {
   try {
-    const { firstName, lastName, email, cpf, phone, password, confirmPassword } = req.body;
+    const { name, email, cpf, phone, password, confirmPassword } = req.body;
 
-    if (!firstName || !lastName || !email || !cpf || !phone || !password || !confirmPassword) {
+    if (!name || !email || !cpf || !phone || !password || !confirmPassword) {
       return res.status(400).json({ error: 'Todos os campos são obrigatórios.' });
     }
     if (password !== confirmPassword) {
@@ -60,6 +60,33 @@ router.post('/register', async (req, res) => {
     const cpfNorm = normalizeDigits(cpf);
     const phoneNorm = normalizeDigits(phone);
 
+    // Basic server-side format validations
+    if (cpfNorm.length !== 11) {
+      return res.status(400).json({ error: 'CPF inválido. Use o formato 000.000.000-00.' });
+    }
+    if (phoneNorm.length !== 11) {
+      return res.status(400).json({ error: 'Telefone inválido. Use o formato (00) 0 0000-0000.' });
+    }
+
+    // CPF checksum validation (server-side safeguard)
+    const isInvalidSequence = /^(\d)\1{10}$/.test(cpfNorm);
+    if (!isInvalidSequence) {
+      let sum = 0;
+      for (let i = 0; i < 9; i++) sum += parseInt(cpfNorm[i], 10) * (10 - i);
+      let first = (sum * 10) % 11; if (first === 10) first = 0;
+      if (first !== parseInt(cpfNorm[9], 10)) {
+        return res.status(400).json({ error: 'CPF inválido. Use o formato 000.000.000-00.' });
+      }
+      sum = 0;
+      for (let i = 0; i < 10; i++) sum += parseInt(cpfNorm[i], 10) * (11 - i);
+      let second = (sum * 10) % 11; if (second === 10) second = 0;
+      if (second !== parseInt(cpfNorm[10], 10)) {
+        return res.status(400).json({ error: 'CPF inválido. Use o formato 000.000.000-00.' });
+      }
+    } else {
+      return res.status(400).json({ error: 'CPF inválido. Use o formato 000.000.000-00.' });
+    }
+
     const existing = await User.findOne({ $or: [{ email: emailNorm }, { cpf: cpfNorm }, { phone: phoneNorm }] });
     if (existing) {
       const conflict = existing.email === emailNorm ? 'email' : existing.cpf === cpfNorm ? 'cpf' : 'telefone';
@@ -67,9 +94,10 @@ router.post('/register', async (req, res) => {
     }
 
     const passwordHash = await bcrypt.hash(password, 10);
-    const user = await User.create({ firstName, lastName, email: emailNorm, cpf: cpfNorm, phone: phoneNorm, passwordHash });
+    const displayName = String(name).trim();
+    const user = await User.create({ name: displayName, email: emailNorm, cpf: cpfNorm, phone: phoneNorm, passwordHash });
 
-    return res.status(201).json({ id: user._id, firstName, lastName, email: emailNorm, cpf: cpfNorm, phone: phoneNorm });
+    return res.status(201).json({ id: user._id, name: displayName, email: emailNorm, cpf: cpfNorm, phone: phoneNorm });
   } catch (err) {
     console.error(err);
     return res.status(500).json({ error: 'Erro interno do servidor.' });
@@ -98,20 +126,21 @@ router.post('/login', async (req, res) => {
     const ok = await bcrypt.compare(password, user.passwordHash);
     if (!ok) return res.status(401).json({ error: 'Credenciais inválidas.' });
 
-    const token = jwt.sign({ sub: user._id.toString() }, process.env.JWT_SECRET || 'dev_secret', { expiresIn: '24h' });
+  const token = jwt.sign({ sub: user._id.toString() }, process.env.JWT_SECRET || 'dev_secret', { expiresIn: '3d' });
 
     // three random tokens from server side
     const token_login = (await bcrypt.genSalt(10)).replace(/[^a-zA-Z0-9]/g, '').slice(0, 24);
     const token_account = (await bcrypt.genSalt(10)).replace(/[^a-zA-Z0-9]/g, '').slice(0, 24);
     const token_default = (await bcrypt.genSalt(10)).replace(/[^a-zA-Z0-9]/g, '').slice(0, 24);
 
-    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+  const expiresAt = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000);
     await Session.create({ userId: user._id, token_login, token_account, token_default, expiresAt });
 
+    const displayName = user.name || `${user.firstName || ''} ${user.lastName || ''}`.trim();
     return res.json({
       token,
       tokens: { token_login, token_account, token_default },
-      user: { id: user._id, firstName: user.firstName, lastName: user.lastName, email: user.email, cpf: user.cpf, phone: user.phone }
+      user: { id: user._id, name: displayName, email: user.email, cpf: user.cpf, phone: user.phone }
     });
   } catch (err) {
     console.error(err);
