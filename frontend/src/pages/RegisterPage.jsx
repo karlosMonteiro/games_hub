@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import api from '../api';
 
-export default function RegisterPage() {
+export default function RegisterPage({ onAuthChange }) {
   const [form, setForm] = useState({
     name: '',
     email: '',
@@ -101,19 +101,20 @@ export default function RegisterPage() {
     }
     try {
       await api.post('/auth/register', form);
-      setSuccess('Conta criada com sucesso! Você já pode entrar.');
-      setTimeout(() => navigate('/login'), 1000);
+  setSuccess('Conta criada com sucesso! Você já pode entrar.');
+  if (onAuthChange) onAuthChange();
+  setTimeout(() => navigate('/login'), 1000);
     } catch (err) {
       setError(err.response?.data?.error || 'Erro ao criar conta');
     }
   }
 
   return (
-    <div className="row justify-content-center">
-      <div className="col-12 col-md-8 col-lg-7">
-        <div className="card shadow-sm">
+    <div className="auth-bg">
+      <div className="auth-center">
+        <div className="auth-card card shadow-lg">
           <div className="card-body">
-            <h3 className="card-title mb-3">Criar conta</h3>
+            <h2 className="card-title mb-4 text-center gradient-text">Criar conta</h2>
             {error && <div className="alert alert-danger">{error}</div>}
             {success && <div className="alert alert-success">{success}</div>}
             <form onSubmit={handleSubmit}>

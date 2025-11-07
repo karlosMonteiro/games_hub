@@ -95,9 +95,9 @@ router.post('/register', async (req, res) => {
 
     const passwordHash = await bcrypt.hash(password, 10);
     const displayName = String(name).trim();
-    const user = await User.create({ name: displayName, email: emailNorm, cpf: cpfNorm, phone: phoneNorm, passwordHash });
+  const user = await User.create({ name: displayName, email: emailNorm, cpf: cpfNorm, phone: phoneNorm, passwordHash });
 
-    return res.status(201).json({ id: user._id, name: displayName, email: emailNorm, cpf: cpfNorm, phone: phoneNorm });
+  return res.status(201).json({ id: user._id, name: displayName, email: emailNorm, cpf: cpfNorm, phone: phoneNorm, theme: user.theme });
   } catch (err) {
     console.error(err);
     return res.status(500).json({ error: 'Erro interno do servidor.' });
@@ -126,21 +126,43 @@ router.post('/login', async (req, res) => {
     const ok = await bcrypt.compare(password, user.passwordHash);
     if (!ok) return res.status(401).json({ error: 'Credenciais inválidas.' });
 
-  const token = jwt.sign({ sub: user._id.toString() }, process.env.JWT_SECRET || 'dev_secret', { expiresIn: '3d' });
+
+    // Use timeout_login from .env, default to 24h
+    const timeoutLogin = process.env.timeout_login || '24h';
+    // Convert timeoutLogin to ms for session expiration
+    function parseTimeout(val) {
+      if (typeof val === 'number') return val;
+      if (typeof val !== 'string') return 24 * 60 * 60 * 1000;
+      if (/^\d+$/.test(val)) return parseInt(val, 10);
+      const match = val.match(/^(\d+)([smhd])$/i);
+      if (!match) return 24 * 60 * 60 * 1000;
+      const num = parseInt(match[1], 10);
+      const unit = match[2].toLowerCase();
+      switch (unit) {
+        case 's': return num * 1000;
+        case 'm': return num * 60 * 1000;
+        case 'h': return num * 60 * 60 * 1000;
+        case 'd': return num * 24 * 60 * 60 * 1000;
+        default: return 24 * 60 * 60 * 1000;
+      }
+    }
+    const expiresMs = parseTimeout(timeoutLogin);
+    const token = jwt.sign({ sub: user._id.toString() }, process.env.JWT_SECRET || 'dev_secret', { expiresIn: timeoutLogin });
 
     // three random tokens from server side
     const token_login = (await bcrypt.genSalt(10)).replace(/[^a-zA-Z0-9]/g, '').slice(0, 24);
     const token_account = (await bcrypt.genSalt(10)).replace(/[^a-zA-Z0-9]/g, '').slice(0, 24);
     const token_default = (await bcrypt.genSalt(10)).replace(/[^a-zA-Z0-9]/g, '').slice(0, 24);
 
-  const expiresAt = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000);
+    // Session expires according to timeout_login
+    const expiresAt = new Date(Date.now() + expiresMs);
     await Session.create({ userId: user._id, token_login, token_account, token_default, expiresAt });
 
     const displayName = user.name || `${user.firstName || ''} ${user.lastName || ''}`.trim();
     return res.json({
       token,
       tokens: { token_login, token_account, token_default },
-      user: { id: user._id, name: displayName, email: user.email, cpf: user.cpf, phone: user.phone }
+      user: { id: user._id, name: displayName, email: user.email, cpf: user.cpf, phone: user.phone, theme: user.theme }
     });
   } catch (err) {
     console.error(err);
@@ -166,6 +188,22 @@ router.post('/logout', authMiddleware, sessionGuard, async (req, res) => {
     res.json({ ok: true });
   } catch (e) {
     res.status(500).json({ error: 'Erro ao encerrar sessão' });
+  }
+});
+
+// Update theme
+router.patch('/theme', authMiddleware, sessionGuard, async (req, res) => {
+  try {
+    const { theme } = req.body;
+    if (!['light', 'dark'].includes(theme)) {
+      return res.status(400).json({ error: 'Tema inválido. Use light ou dark.' });
+    }
+    const user = await User.findByIdAndUpdate(req.userId, { theme }, { new: true }).select('-passwordHash');
+    if (!user) return res.status(404).json({ error: 'Usuário não encontrado.' });
+    return res.json({ id: user._id, theme: user.theme });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'Erro interno ao atualizar tema.' });
   }
 });
 

@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../api';
 
-export default function LoginPage() {
+
+export default function LoginPage({ onAuthChange }) {
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -21,6 +22,7 @@ export default function LoginPage() {
         localStorage.setItem('token_account', data.tokens.token_account);
         localStorage.setItem('token_default', data.tokens.token_default);
       }
+  if (onAuthChange) onAuthChange();
   navigate('/games');
     } catch (err) {
       setError(err.response?.data?.error || 'Falha no login');
@@ -28,11 +30,11 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="row justify-content-center">
-      <div className="col-12 col-md-6 col-lg-5">
-        <div className="card shadow-sm">
+    <div className="auth-bg">
+      <div className="auth-center">
+        <div className="auth-card card shadow-lg">
           <div className="card-body">
-            <h3 className="card-title mb-3">Entrar</h3>
+            <h2 className="card-title mb-4 text-center gradient-text">Entrar</h2>
             {error && <div className="alert alert-danger">{error}</div>}
             <form onSubmit={handleSubmit}>
               <div className="mb-3">
@@ -60,10 +62,10 @@ export default function LoginPage() {
                   </button>
                 </div>
               </div>
-              <button type="submit" className="btn btn-primary w-100">Entrar</button>
+              <button type="submit" className="btn btn-primary w-100 py-2 fs-5">Entrar</button>
             </form>
-            <div className="mt-3">
-              <small>Não tem conta? <Link to="/register">Crie uma</Link></small>
+            <div className="mt-4 text-center">
+              <small>Não tem conta? <Link to="/register" className="link-primary">Crie uma</Link></small>
             </div>
           </div>
         </div>

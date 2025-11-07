@@ -7,7 +7,8 @@ const UserSchema = new mongoose.Schema(
     cpf: { type: String, required: true, unique: true, trim: true },
   phone: { type: String, required: true, unique: true, trim: true },
   passwordHash: { type: String, required: true },
-  role: { type: String, enum: ['user', 'admin'], default: 'user' }
+  role: { type: String, enum: ['user', 'admin'], default: 'user' },
+  theme: { type: String, enum: ['light', 'dark'], default: 'light' }
   },
   { timestamps: true }
 );

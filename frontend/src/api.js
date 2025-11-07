@@ -16,4 +16,26 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+function forceLogoutToLogin() {
+  try { localStorage.removeItem('token'); } catch {}
+  try { localStorage.removeItem('user'); } catch {}
+  try { localStorage.removeItem('token_login'); } catch {}
+  try { localStorage.removeItem('token_account'); } catch {}
+  try { localStorage.removeItem('token_default'); } catch {}
+  // Hard redirect to clear any in-memory state
+  if (window.location.pathname !== '/login') window.location.href = '/login';
+}
+
+api.interceptors.response.use(
+  (res) => res,
+  (error) => {
+    const status = error?.response?.status;
+    if (status === 401) {
+      // Any 401 from main or game backends -> logout
+      forceLogoutToLogin();
+    }
+    return Promise.reject(error);
+  }
+);
+
 export default api;

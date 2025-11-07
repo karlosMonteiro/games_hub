@@ -1,0 +1,316 @@
+// Roxo de login
+:root {
+    --wordme-bg: linear-gradient(135deg, #6743A5 0%, #7345D6 60%, #fff 100%);
+    --wordme-card: #fff;
+    --wordme-title: #7345D6;
+    /* Responsive sizing defaults */
+    --wordme-block-size: 44px;
+    --wordme-block-gap: 4px;
+    --wordme-key-width: 36px;
+    --wordme-key-height: 44px;
+    --wordme-key-gap: 2px;
+    --wordme-key-font-size: 1.05rem;
+    --wordme-title-size: 2.2rem;
+    --wordme-container-padding-x: 0.5rem;
+    --wordme-enter-min-width: 140px;
+    --wordme-backspace-min-width: 72px;
+}
+
+.wordme-game-bg {
+
+    .wordme-game-bg {
+        min-height: 100vh;
+        display: flex;
+        align-items: flex-start;
+        justify-content: center;
+        padding-top: 0 !important;
+        margin-top: 0 !important;
+    }
+
+    .wordme-game-container {
+        width: 100%;
+        max-width: none;
+        margin: 0 auto;
+        padding: 0 0.5rem 0 0.5rem;
+        border-radius: 0;
+        box-shadow: none;
+        background: transparent;
+        backdrop-filter: none;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+.wordme-header {
+    width: 100%;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    padding: 0 0.25rem 0 0.25rem;
+    margin-bottom: 0 !important;
+    position: relative;
+    top: 0;
+}
+.wordme-settings-btn {
+    background: none;
+    border: none;
+    color: #7345D6; /* purple on light mode */
+    font-size: 1.7rem;
+    cursor: pointer;
+    padding: 0.2rem 0.5rem;
+    border-radius: 8px;
+    transition: background 0.2s, color 0.2s;
+}
+[data-theme="dark"] .wordme-settings-btn {
+    color: #fff; /* white in dark mode */
+}
+.wordme-settings-btn:hover {
+    background: rgba(255,255,255,0.12);
+}
+.wordme-blocks-grid {
+    width: 100%;
+    margin-top: 0 !important;
+    margin-bottom: 2.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: var(--wordme-block-gap);
+}
+.wordme-blocks-row {
+    display: flex;
+    flex-direction: row;
+    gap: var(--wordme-block-gap); /* tighter proximity between columns */
+    justify-content: center;
+}
+.wordme-block {
+    width: var(--wordme-block-size);
+    height: var(--wordme-block-size);
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px 0 rgba(104,67,173,0.10);
+    border: 2px solid #6843ad;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: #6843ad;
+    transition: border-color 0.2s, background 0.2s;
+    position: relative;
+}
+.wordme-block-center {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #6843ad;
+    letter-spacing: 2px;
+}
+.wordme-keyboard {
+    width: 100%;
+    margin-top: 0 !important;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--wordme-key-gap);
+}
+.wordme-keyboard-row {
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+    justify-content: center;
+}
+.wordme-key {
+    background: #7345D6; /* purple different from page bg */
+    border: none;
+    color: #ffffff; /* white letters */
+    font-size: var(--wordme-key-font-size);
+    font-weight: 700;
+    border-radius: 8px;
+    width: var(--wordme-key-width);
+    height: var(--wordme-key-height);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.15s ease-in-out;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.12);
+}
+.wordme-key:hover {
+    background: #7f54df; /* hover slightly lighter */
+}
+.wordme-key:active {
+    background: #5f39c4; /* pressed darker */
+}
+.wordme-key.wide {
+    min-width: 120px;
+    padding: 0 18px;
+}
+/* Specific key sizes */
+.wordme-key--enter {
+    min-width: var(--wordme-enter-min-width); /* wider ENTER */
+    padding: 0 20px;
+}
+.wordme-key--backspace {
+    min-width: var(--wordme-backspace-min-width); /* narrower BACKSPACE */
+    padding: 0 12px;
+}
+.wordme-keyboard-row--offset3 {
+    margin-left: 0px;
+    display: flex;
+    align-items: flex-start;
+}
+[data-theme="dark"] .wordme-key {
+    color: #ffffff; /* keep white on dark */
+}
+.wordme-key:active {
+    background: #e2d6fa;
+    border-color: #4c2e7a;
+}
+
+    .wordme-title {
+        text-align: center;
+        font-size: var(--wordme-title-size);
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+        letter-spacing: 2px;
+    }
+
+    .gradient-text {
+        background: linear-gradient(90deg, #7b2ff2 0%, #f357a8 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        color: transparent;
+    }
+
+    .wordme-card {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 1rem;
+        box-shadow: 0 2px 16px 0 rgba(123, 47, 242, 0.08);
+        padding: 1.5rem;
+    }
+
+    .wordme-input {
+        font-size: 1.2rem;
+        border-radius: 0.5rem;
+        border: 2px solid #7b2ff2;
+        transition: border-color 0.2s;
+    }
+
+    .wordme-input:focus {
+        border-color: #f357a8;
+        outline: none;
+    }
+
+    .btn-primary {
+        background: linear-gradient(90deg, #7b2ff2 0%, #f357a8 100%);
+        border: none;
+        color: #fff;
+        font-weight: 600;
+        border-radius: 0.5rem;
+        padding: 0.5rem 1.2rem;
+        transition: background 0.2s;
+    }
+
+    .btn-primary:hover {
+        background: linear-gradient(90deg, #f357a8 0%, #7b2ff2 100%);
+    }
+
+    .alert {
+        border-radius: 0.5rem;
+        font-size: 1rem;
+        margin-top: 1rem;
+    }
+
+    .card {
+        border: none;
+    }
+
+    .card-body {
+        padding: 0;
+    }
+}
+
+/* Responsive breakpoints */
+@media (min-width: 1200px) {
+    :root {
+        --wordme-block-size: 50px;
+        --wordme-key-width: 40px;
+        --wordme-key-height: 48px;
+        --wordme-key-font-size: 1.1rem;
+        --wordme-title-size: 2.4rem;
+        --wordme-enter-min-width: 150px;
+    }
+}
+
+/* Larger desktops */
+@media (min-width: 1600px) {
+    :root {
+        --wordme-block-size: 56px;
+        --wordme-key-width: 46px;
+        --wordme-key-height: 54px;
+        --wordme-key-font-size: 1.25rem;
+        --wordme-title-size: 2.6rem;
+        --wordme-enter-min-width: 170px;
+        --wordme-backspace-min-width: 84px;
+    }
+    .wordme-settings-btn { font-size: 2rem; }
+    .wordme-header { margin-bottom: 0.25rem; }
+    .wordme-keyboard { margin-top: 0; }
+}
+
+/* Ultra-wide screens */
+@media (min-width: 1920px) {
+    :root {
+        --wordme-block-size: 64px;
+        --wordme-key-width: 52px;
+        --wordme-key-height: 60px;
+        --wordme-key-font-size: 1.35rem;
+        --wordme-title-size: 2.8rem;
+        --wordme-enter-min-width: 190px;
+        --wordme-backspace-min-width: 92px;
+    }
+    .wordme-settings-btn { font-size: 2.2rem; }
+    .wordme-header { margin-bottom: 0.2rem; }
+    .wordme-keyboard { margin-top: 0; }
+}
+
+@media (max-width: 992px) {
+    :root {
+        --wordme-block-size: 40px;
+        --wordme-key-width: 34px;
+        --wordme-key-height: 42px;
+        --wordme-key-font-size: 1rem;
+        --wordme-title-size: 2rem;
+        --wordme-container-padding-x: 0.5rem;
+        --wordme-enter-min-width: 136px;
+        --wordme-backspace-min-width: 68px;
+    }
+}
+
+@media (max-width: 768px) {
+    :root {
+        --wordme-block-size: 36px;
+        --wordme-key-width: 32px;
+        --wordme-key-height: 40px;
+        --wordme-key-font-size: 0.95rem;
+        --wordme-title-size: 1.8rem;
+        --wordme-container-padding-x: 0.5rem;
+        --wordme-enter-min-width: 124px;
+        --wordme-backspace-min-width: 64px;
+    }
+}
+
+@media (max-width: 576px) {
+    :root {
+        --wordme-block-size: 32px;
+        --wordme-key-width: 30px;
+        --wordme-key-height: 38px;
+        --wordme-key-font-size: 0.9rem;
+        --wordme-title-size: 1.6rem;
+        --wordme-container-padding-x: 0.25rem;
+        --wordme-enter-min-width: 116px;
+        --wordme-backspace-min-width: 56px;
+    }
+}
