@@ -32,6 +32,7 @@ services:
       - "${FRONTEND_HOST_PORT:-6600}:80"
     depends_on:
       - backend
+      - wordme_backend
   mongo-express:
     image: mongo-express:1.0.2-20
     restart: unless-stopped
@@ -56,13 +57,14 @@ services:
     depends_on:
       - frontend
       - backend
+      - wordme_backend
   wordme_backend:
     build: ./wordme/backend
     container_name: gameshub-wordme-backend
     restart: unless-stopped
     environment:
       - PORT=${WORDME_BACKEND_PORT:-4100}
-      - WORDME_MONGO_URI=mongodb://root:0f5pMWmGJndLb43pf9gsG7b4uncOcG@mongo:27017/wordme-games_hub?authSource=admin
+      - WORDME_MONGO_URI=mongodb://root:0f5pMWmGJndLb43pf9gsG7b4uncOcG@mongo:27017/wordme?authSource=admin
       - AUTH_SERVICE_URL=http://backend:4000
       - JWT_SECRET=${JWT_SECRET:-change_me}
       - CORS_ORIGIN=http://localhost:${FRONTEND_HOST_PORT:-6600},http://localhost:${NGINX_HOST_PORT:-6603}

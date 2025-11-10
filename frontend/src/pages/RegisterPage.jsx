@@ -168,15 +168,6 @@ export default function RegisterPage({ onAuthChange }) {
                       onChange={handleChange}
                       required
                     />
-                    <button
-                      type="button"
-                      className="btn btn-outline-secondary"
-                      onClick={() => setShowPassword((v) => !v)}
-                      aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
-                      title={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
-                    >
-                      <i className={`bi ${showPassword ? 'bi-eye-slash' : 'bi-eye'}`}></i>
-                    </button>
                   </div>
                   {submitted && form.password !== form.confirmPassword && (
                     <div className="invalid-feedback d-block">As senhas não coincidem</div>
@@ -196,7 +187,10 @@ export default function RegisterPage({ onAuthChange }) {
                     <button
                       type="button"
                       className="btn btn-outline-secondary"
-                      onClick={() => setShowConfirmPassword((v) => !v)}
+                      onClick={() => {
+                        setShowConfirmPassword((v) => !v);
+                        setShowPassword((v) => !v);
+                      }}
                       aria-label={showConfirmPassword ? 'Ocultar senha' : 'Mostrar senha'}
                       title={showConfirmPassword ? 'Ocultar senha' : 'Mostrar senha'}
                     >

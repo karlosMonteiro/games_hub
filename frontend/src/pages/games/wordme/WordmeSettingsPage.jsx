@@ -47,6 +47,8 @@ export default function WordmeSettingsPage() {
   const [len, setLen] = useState(5);
   const [search, setSearch] = useState('');
   const [list, setList] = useState([]);
+  const [pagination, setPagination] = useState({ page: 1, totalPages: 1, total: 0 });
+  const [stats, setStats] = useState({ words5: 0, words6: 0, words7: 0, total: 0 });
   const [newWord, setNewWord] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -60,8 +62,9 @@ export default function WordmeSettingsPage() {
     setLoading(true);
     setError('');
     try {
-      const { data } = await api.get('/wordme/words', { params: { length: len, search } });
-      setList(data);
+      const { data } = await api.get('/wordme/words', { params: { length: len, search, page: pagination.page } });
+      setList(data.list || []);
+      setPagination(data.pagination || { page: 1, totalPages: 1, total: 0 });
     } catch (e) {
       setError(e.response?.data?.error || 'Erro ao carregar');
     } finally {
@@ -69,16 +72,27 @@ export default function WordmeSettingsPage() {
     }
   }
 
-  useEffect(() => { fetchList(); /* eslint-disable-next-line */ }, [len, search]);
+  async function fetchStats() {
+    try {
+      const { data } = await api.get('/wordme/words/stats');
+      setStats(data);
+    } catch (e) {
+      console.error('Erro ao buscar estatísticas:', e);
+    }
+  }
+
+  useEffect(() => { fetchStats(); }, []);
+  useEffect(() => { setPagination(prev => ({ ...prev, page: 1 })); }, [len, search]);
+  useEffect(() => { fetchList(); /* eslint-disable-next-line */ }, [len, search, pagination.page]);
 
   async function addWord(e) {
     e.preventDefault();
     if (!canSubmitWord) return;
     try {
-      const { data } = await api.post('/wordme/words', { word: newWord });
+      await api.post('/wordme/words', { word: newWord });
       setNewWord('');
-      // If new word length matches current len, prepend
-      if (data.word?.length === len) setList((prev) => [{ id: data.id, word: data.word }, ...prev]);
+      fetchList();
+      fetchStats();
     } catch (e) {
       setError(e.response?.data?.error || 'Erro ao adicionar');
     }
@@ -86,10 +100,9 @@ export default function WordmeSettingsPage() {
 
   async function editWord(id, text) {
     try {
-      const { data } = await api.patch(`/wordme/words/${id}`, { newWord: text });
-      // If length changed, remove from current list; else update
-      if (data.word.length !== len) setList((prev) => prev.filter((x) => x.id !== id));
-      else setList((prev) => prev.map((x) => x.id === id ? { id, word: data.word } : x));
+      await api.patch(`/wordme/words/${id}`, { newWord: text });
+      fetchList();
+      fetchStats();
     } catch (e) {
       setError(e.response?.data?.error || 'Erro ao salvar');
     }
@@ -98,7 +111,8 @@ export default function WordmeSettingsPage() {
   async function deleteWord(id) {
     try {
       await api.delete(`/wordme/words/${id}`);
-      setList((prev) => prev.filter((x) => x.id !== id));
+      fetchList();
+      fetchStats();
     } catch (e) {
       setError(e.response?.data?.error || 'Erro ao remover');
     }
@@ -107,6 +121,15 @@ export default function WordmeSettingsPage() {
   return (
     <div>
       <h3 className="mb-3">Wordme – Configurações</h3>
+      
+      {/* Stats */}
+      <div className="alert alert-info d-flex justify-content-around mb-3">
+        <div><strong>5 letras:</strong> {stats.words5} palavras</div>
+        <div><strong>6 letras:</strong> {stats.words6} palavras</div>
+        <div><strong>7 letras:</strong> {stats.words7} palavras</div>
+        <div><strong>Total:</strong> {stats.total} palavras</div>
+      </div>
+      
       {error && <div className="alert alert-danger">{error}</div>}
       <div className="card">
         <div className="card-body">
@@ -129,12 +152,39 @@ export default function WordmeSettingsPage() {
           {loading ? (
             <div className="text-muted">Carregando...</div>
           ) : (
-            <ul className="list-group">
-              {list.map((item) => (
-                <WordRow key={item.id} item={item} onEdit={editWord} onDelete={deleteWord} />
-              ))}
-              {list.length === 0 && <li className="list-group-item text-muted">Sem palavras cadastradas.</li>}
-            </ul>
+            <>
+              <ul className="list-group">
+                {list.map((item) => (
+                  <WordRow key={item.id} item={item} onEdit={editWord} onDelete={deleteWord} />
+                ))}
+                {list.length === 0 && <li className="list-group-item text-muted">Sem palavras cadastradas.</li>}
+              </ul>
+              
+              {/* Pagination */}
+              {pagination.totalPages > 1 && (
+                <div className="d-flex justify-content-between align-items-center mt-3">
+                  <div className="text-muted">
+                    Página {pagination.page} de {pagination.totalPages} ({pagination.total} palavras)
+                  </div>
+                  <div className="btn-group">
+                    <button 
+                      className="btn btn-sm btn-outline-primary" 
+                      disabled={!pagination.hasPrev}
+                      onClick={() => setPagination(prev => ({ ...prev, page: prev.page - 1 }))}
+                    >
+                      ← Anterior
+                    </button>
+                    <button 
+                      className="btn btn-sm btn-outline-primary" 
+                      disabled={!pagination.hasNext}
+                      onClick={() => setPagination(prev => ({ ...prev, page: prev.page + 1 }))}
+                    >
+                      Próxima →
+                    </button>
+                  </div>
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>

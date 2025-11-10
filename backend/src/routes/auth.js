@@ -182,6 +182,37 @@ router.get('/me', authMiddleware, sessionGuard, async (req, res) => {
   }
 });
 
+// Introspect - Verify token and return user data (for internal service-to-service calls)
+router.post('/introspect', async (req, res) => {
+  try {
+    const { token } = req.body;
+    if (!token) {
+      return res.status(400).json({ error: 'Token não fornecido' });
+    }
+
+    const payload = jwt.verify(token, process.env.JWT_SECRET || 'dev_secret');
+    const user = await User.findById(payload.sub).select('-passwordHash');
+    
+    if (!user) {
+      return res.status(404).json({ error: 'Usuário não encontrado' });
+    }
+
+    return res.json({
+      id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      isSuperAdmin: user.role === 'admin'
+    });
+  } catch (err) {
+    if (err.name === 'JsonWebTokenError' || err.name === 'TokenExpiredError') {
+      return res.status(401).json({ error: 'Token inválido ou expirado' });
+    }
+    console.error('Introspect error:', err);
+    return res.status(500).json({ error: 'Erro interno do servidor.' });
+  }
+});
+
 router.post('/logout', authMiddleware, sessionGuard, async (req, res) => {
   try {
     await Session.findByIdAndDelete(req.sessionId);

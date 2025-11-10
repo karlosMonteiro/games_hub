@@ -5,6 +5,8 @@ import morgan from 'morgan';
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 import axios from 'axios';
+import gameRouter from './routes/game.js';
+import wordsRouter from './routes/words.js';
 
 dotenv.config();
 
@@ -17,7 +19,7 @@ app.use(express.json());
 if (process.env.NODE_ENV !== 'production') app.use(morgan('dev'));
 
 // Mongo connection (Wordme isolated DB)
-const WORDME_MONGO_URI = process.env.WORDME_MONGO_URI || 'mongodb://root:change_me@mongo:27017/wordme-games_hub?authSource=admin';
+const WORDME_MONGO_URI = process.env.WORDME_MONGO_URI || 'mongodb://root:change_me@mongo:27017/wordme?authSource=admin';
 const PORT = process.env.PORT || 4100;
 const AUTH_SERVICE_URL = process.env.AUTH_SERVICE_URL || 'http://backend:4000';
 
@@ -69,22 +71,11 @@ app.get('/api/wordme/health', (req, res) => {
   res.json({ status: 'ok', service: 'wordme-backend' });
 });
 
-// Model (inline) for words5 collection
-const Word5 = mongoose.model('Word5', new mongoose.Schema({
-  word: { type: String, required: true, unique: true }, // stored as UPPERCASE A-Z, length 5
-}, { collection: 'words5' }));
+// Game routes (create game, guess, get state)
+app.use('/api/wordme', authGuard, gameRouter);
 
-// Get a random 5-letter word from DB
-app.get('/api/wordme/word', authGuard, async (req, res) => {
-  try {
-    const docs = await Word5.aggregate([{ $sample: { size: 1 } }]);
-    if (!docs.length) return res.status(404).json({ error: 'Nenhuma palavra encontrada. Execute o seed words5.' });
-    return res.json({ word: docs[0].word });
-  } catch (e) {
-    console.error('Erro ao sortear palavra:', e.message);
-    return res.status(500).json({ error: 'Erro ao obter palavra' });
-  }
-});
+// Words CRUD routes for admin settings
+app.use('/api/wordme/words', authGuard, wordsRouter);
 
 app.get('/api/wordme/me', authGuard, (req, res) => {
   res.json({ user: req.user });

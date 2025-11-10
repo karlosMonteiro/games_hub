@@ -26,6 +26,7 @@ export default function Sidebar({ onAuthChange }) {
   if (!token) return null; // hide sidebar when not authenticated
   const [user, setUser] = useState(userFromStorage);
   const [wordmeOpen, setWordmeOpen] = useState(false);
+  const [novidadesOpen, setNovidadesOpen] = useState(false);
   const isSuperAdmin = user?.role === 'admin';
 
   useEffect(() => {
@@ -58,6 +59,51 @@ export default function Sidebar({ onAuthChange }) {
       </Link>
 
       <ul className="nav-list">
+        {/* Novidades always on top */}
+        {!isSuperAdmin && (
+          <li>
+            <Link className="nav-link d-flex align-items-center gap-2" to="/novidades">
+              <i className="bi bi-newspaper" style={{ fontSize: '1.2em' }}></i>
+              Novidades
+            </Link>
+          </li>
+        )}
+
+        {isSuperAdmin && (
+          <li>
+            <button
+              type="button"
+              className="nav-link d-flex align-items-center gap-2 w-100 text-start"
+              onClick={() => setNovidadesOpen((v) => !v)}
+              aria-expanded={novidadesOpen}
+              aria-controls="submenu-novidades"
+              style={{ background: 'none', border: 0 }}
+            >
+              <i className="bi bi-newspaper" style={{ fontSize: '1.2em' }}></i>
+              Novidades
+              <span className="ms-auto">
+                <i className={`bi ${novidadesOpen ? 'bi-chevron-up' : 'bi-chevron-down'}`}></i>
+              </span>
+            </button>
+            {novidadesOpen && (
+              <ul id="submenu-novidades" className="submenu list-unstyled ms-4 mt-1">
+                <li>
+                  <Link className="nav-link d-flex align-items-center gap-2" to="/novidades">
+                    <i className="bi bi-eye" style={{ fontSize: '1em' }}></i>
+                    Ver Novidades
+                  </Link>
+                </li>
+                <li>
+                  <Link className="nav-link d-flex align-items-center gap-2" to="/novidades/configurações">
+                    <i className="bi bi-sliders" style={{ fontSize: '1em' }}></i>
+                    Configurações
+                  </Link>
+                </li>
+              </ul>
+            )}
+          </li>
+        )}
+
         <li>
           <Link className="nav-link d-flex align-items-center gap-2" to="/games">
             <i className="bi bi-joystick" style={{ fontSize: '1.2em' }}></i>

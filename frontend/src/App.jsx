@@ -8,6 +8,8 @@ import Sidebar from './components/sidebar/Sidebar.jsx';
 import SettingsPage from './pages/SettingsPage/SettingsPage.jsx';
 import WordmeGame from './pages/games/wordme/WordmeGame.jsx';
 import WordmeSettingsPage from './pages/games/wordme/WordmeSettingsPage.jsx';
+import NovidadesPage from './pages/NovidadesPage.jsx';
+import NovidadesConfigPage from './pages/NovidadesConfigPage.jsx';
 
 function useAuth() {
   const token = localStorage.getItem('token');
@@ -141,6 +143,8 @@ export default function App() {
               <Route path="/games" element={<PrivateRoute><Games /></PrivateRoute>} />
               <Route path="/wordme/game" element={<PrivateRoute><WordmeGame /></PrivateRoute>} />
               <Route path="/wordme/configurações" element={<AdminRoute><WordmeSettingsPage /></AdminRoute>} />
+              <Route path="/novidades" element={<PrivateRoute><NovidadesPage /></PrivateRoute>} />
+              <Route path="/novidades/configurações" element={<AdminRoute><NovidadesConfigPage /></AdminRoute>} />
               <Route path="/profile" element={<PrivateRoute><ProfilePage /></PrivateRoute>} />
               <Route path="/settings" element={<SettingsPage />} />
               <Route path="/login" element={<LoginPage onAuthChange={refreshAuth} />} />

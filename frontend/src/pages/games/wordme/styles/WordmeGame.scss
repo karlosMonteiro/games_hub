@@ -96,12 +96,38 @@
     transition: border-color 0.2s, background 0.2s;
     position: relative;
 }
+.wordme-block--correct {
+    background: #2e7d32; /* green */
+    border-color: #2e7d32;
+    color: #fff;
+}
+.wordme-block--present {
+    background: #c9a406; /* amber */
+    border-color: #c9a406;
+    color: #fff;
+}
+.wordme-block--absent {
+    background: #b0b0b5; /* gray */
+    border-color: #b0b0b5;
+    color: #fff;
+}
+.wordme-block--selected::after {
+    content: '';
+    position: absolute;
+    bottom: 4px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 70%;
+    height: 3px;
+    background: #6843ad;
+    border-radius: 2px;
+}
 .wordme-block-center {
     position: absolute;
     left: 50%;
     top: 50%;
     transform: translate(-50%, -50%);
-    font-size: 1.1rem;
+    font-size: 1.35rem;
     font-weight: 700;
     color: #6843ad;
     letter-spacing: 2px;
@@ -166,6 +192,15 @@
 .wordme-key:active {
     background: #e2d6fa;
     border-color: #4c2e7a;
+}
+
+.wordme-inline-message {
+    margin-top: 0.75rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #b22222; /* dark red for error */
+    text-align: center;
+    letter-spacing: 0.5px;
 }
 
     .wordme-title {
