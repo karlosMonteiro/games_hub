@@ -8,11 +8,12 @@ export default function Games() {
     {
       id: 'wordme',
       name: 'Wordme',
-      description: 'Adivinhe a palavra de 5 letras em 6 tentativas',
-      color: 'linear-gradient(135deg, #7b2ff2 0%, #f357a8 100%)',
+      description: 'Desafie sua mente com palavras de 5 letras. Você tem 6 tentativas para descobrir a palavra secreta!',
+      color: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
       icon: '🔤',
       path: '/wordme/game',
-      tagline: 'Desafie seu vocabulário'
+      tagline: 'Desafie seu vocabulário',
+      badge: 'Popular'
     }
   ];
 
@@ -33,6 +34,7 @@ export default function Games() {
           >
             <div className="game-card-background"></div>
             <div className="game-card-content">
+              {game.badge && <span className="game-badge">{game.badge}</span>}
               <div className="game-icon">{game.icon}</div>
               <h3 className="game-name">{game.name}</h3>
               <p className="game-tagline">{game.tagline}</p>

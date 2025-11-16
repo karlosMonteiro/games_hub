@@ -8,6 +8,8 @@ export default function WordmeGame() {
   const [evalGrid, setEvalGrid] = useState(() => Array.from({ length: 6 }, () => Array(5).fill(null))); // null|correct|present|absent
   const [currentRow, setCurrentRow] = useState(0);
   const [currentCol, setCurrentCol] = useState(0);
+  const [revealingRow, setRevealingRow] = useState(null); // Linha sendo revelada
+  const [revealedCols, setRevealedCols] = useState([]); // Colunas já reveladas
 
   // Game session
   const [gameId, setGameId] = useState(null);
@@ -64,28 +66,57 @@ export default function WordmeGame() {
     const word = grid[currentRow].join('');
     if (word.length < 5) return; // incomplete row
     if (!gameId) return;
+    if (submitting || revealingRow !== null) return; // Bloqueia durante animação
+
     setSubmitting(true);
     try {
       const { data } = await api.post('/wordme/guess', { gameId, word });
       const evaluation = data.evaluation || [];
-      setEvalGrid(prev => {
-        const rowEval = evaluation.map(e => e.state); // ['correct','present','absent']
-        return prev.map((r,i)=> i===currentRow ? rowEval : r);
+      
+      // Inicia animação de revelação
+      setRevealingRow(currentRow);
+      setRevealedCols([]);
+
+      // Revela letra por letra com delay
+      evaluation.forEach((e, colIndex) => {
+        setTimeout(() => {
+          setRevealedCols(prev => [...prev, colIndex]);
+          setEvalGrid(prevEval => {
+            const newEval = prevEval.map((r, i) => 
+              i === currentRow 
+                ? r.map((cell, c) => c === colIndex ? e.state : cell)
+                : r
+            );
+            return newEval;
+          });
+
+          // Quando última letra for revelada
+          if (colIndex === 4) {
+            setTimeout(() => {
+              setRevealingRow(null);
+              setRevealedCols([]);
+              setStatus(data.status || 'in_progress');
+              setMessage('');
+              
+              if (data.status === 'in_progress') {
+                setCurrentRow(r => r + 1);
+                setCurrentCol(0);
+              }
+              setSubmitting(false);
+            }, 400); // Aguarda animação terminar
+          }
+        }, colIndex * 150); // 150ms entre cada letra
       });
-      setStatus(data.status || 'in_progress');
-      setMessage('');
-      if (data.status === 'in_progress') {
-        setCurrentRow(r => r + 1);
-        setCurrentCol(0);
-      }
+
     } catch (e) {
       const code = e?.response?.status;
       if (code === 422) setMessage('essa palavra não é aceita');
       else if (code === 404) setMessage('jogo não encontrado');
       else if (code === 400) setMessage(e?.response?.data?.error || 'erro');
       else setMessage('falha ao enviar tentativa');
-    } finally {
       setSubmitting(false);
+      setRevealingRow(null);
+      setRevealedCols([]);
     }
   };
 
@@ -125,10 +156,12 @@ export default function WordmeGame() {
                 const isSelected = rowIdx === currentRow && colIdx === currentCol;
                 const isActiveRow = rowIdx === currentRow;
                 const state = evalGrid[rowIdx][colIdx];
+                const isRevealing = revealingRow === rowIdx && revealedCols.includes(colIdx);
+                
                 return (
                   <div
                     key={colIdx}
-                    className={`wordme-block ${isSelected ? 'wordme-block--selected' : ''} ${state ? 'wordme-block--' + state : ''}`}
+                    className={`wordme-block ${isSelected ? 'wordme-block--selected' : ''} ${state ? 'wordme-block--' + state : ''} ${isRevealing ? 'wordme-block--revealing' : ''}`}
                     onClick={() => { if (rowIdx === currentRow) setCurrentCol(colIdx); }}
                     style={isActiveRow ? { cursor: 'pointer' } : undefined}
                   >

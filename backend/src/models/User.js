@@ -8,7 +8,12 @@ const UserSchema = new mongoose.Schema(
   phone: { type: String, required: true, unique: true, trim: true },
   passwordHash: { type: String, required: true },
   role: { type: String, enum: ['user', 'admin'], default: 'user' },
-  theme: { type: String, enum: ['light', 'dark'], default: 'light' }
+  theme: { type: String, enum: ['light', 'dark'], default: 'light' },
+  friends: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+  friendRequests: [{
+    from: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    createdAt: { type: Date, default: Date.now }
+  }]
   },
   { timestamps: true }
 );

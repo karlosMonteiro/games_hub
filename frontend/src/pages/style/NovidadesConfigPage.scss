@@ -1,7 +1,8 @@
 .novidades-config-page {
-  padding: 2rem;
+  padding: 2rem 1rem;
   max-width: 1000px;
   margin: 0 auto;
+  min-height: calc(100vh - 80px);
 
   .config-header {
     display: flex;

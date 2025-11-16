@@ -93,23 +93,41 @@
     font-size: 1.3rem;
     font-weight: 600;
     color: #6843ad;
-    transition: border-color 0.2s, background 0.2s;
+    transition: border-color 0.2s, background 0.2s, color 0.2s;
     position: relative;
 }
+
+/* Animação de revelação */
+.wordme-block--revealing {
+    animation: flipReveal 0.4s ease-in-out;
+}
+
+@keyframes flipReveal {
+    0% {
+        transform: rotateX(0deg) scale(1);
+    }
+    50% {
+        transform: rotateX(90deg) scale(1.05);
+    }
+    100% {
+        transform: rotateX(0deg) scale(1);
+    }
+}
+
 .wordme-block--correct {
-    background: #2e7d32; /* green */
-    border-color: #2e7d32;
-    color: #fff;
+    background: #2d7e32; /* green */
+    border-color: #2d7e32;
+    color: #fff !important;
 }
 .wordme-block--present {
-    background: #c9a406; /* amber */
-    border-color: #c9a406;
-    color: #fff;
+    background: #c6a206; /* amber */
+    border-color: #c6a206;
+    color: #fff !important;
 }
 .wordme-block--absent {
-    background: #b0b0b5; /* gray */
-    border-color: #b0b0b5;
-    color: #fff;
+    background: #b1b0b8; /* gray */
+    border-color: #b1b0b8;
+    color: #fff !important;
 }
 .wordme-block--selected::after {
     content: '';
@@ -122,6 +140,7 @@
     background: #6843ad;
     border-radius: 2px;
 }
+
 .wordme-block-center {
     position: absolute;
     left: 50%;
@@ -129,8 +148,15 @@
     transform: translate(-50%, -50%);
     font-size: 1.35rem;
     font-weight: 700;
-    color: #6843ad;
+    color: inherit; /* Herda a cor do bloco pai */
     letter-spacing: 2px;
+}
+
+/* Garantir que a letra fique branca nos blocos com feedback */
+.wordme-block--correct .wordme-block-center,
+.wordme-block--present .wordme-block-center,
+.wordme-block--absent .wordme-block-center {
+    color: #fff !important;
 }
 .wordme-keyboard {
     width: 100%;

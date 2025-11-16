@@ -137,7 +137,6 @@ export default function App() {
       <div className="app-shell d-flex">
   {isAuthenticated && <Sidebar key={authVersion} onAuthChange={refreshAuth} />}
         <main className="app-content flex-grow-1">
-          <div className="container my-4">
             <Routes>
               <Route path="/" element={<Navigate to="/games" replace />} />
               <Route path="/games" element={<PrivateRoute><Games /></PrivateRoute>} />
@@ -145,12 +144,11 @@ export default function App() {
               <Route path="/wordme/configurações" element={<AdminRoute><WordmeSettingsPage /></AdminRoute>} />
               <Route path="/novidades" element={<PrivateRoute><NovidadesPage /></PrivateRoute>} />
               <Route path="/novidades/configurações" element={<AdminRoute><NovidadesConfigPage /></AdminRoute>} />
-              <Route path="/profile" element={<PrivateRoute><ProfilePage /></PrivateRoute>} />
-              <Route path="/settings" element={<SettingsPage />} />
+              <Route path="/profile" element={<PrivateRoute><div className="container my-4"><ProfilePage /></div></PrivateRoute>} />
+              <Route path="/settings" element={<div className="container my-4"><SettingsPage /></div>} />
               <Route path="/login" element={<LoginPage onAuthChange={refreshAuth} />} />
               <Route path="/register" element={<RegisterPage onAuthChange={refreshAuth} />} />
             </Routes>
-          </div>
         </main>
       </div>
     </>

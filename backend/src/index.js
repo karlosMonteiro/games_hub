@@ -7,6 +7,7 @@ import mongoose from 'mongoose';
 import authRoutes from './routes/auth.js';
 import wordmeRoutes from './routes/wordme.js';
 import novidadesRoutes from './routes/novidades.js';
+import friendsRoutes from './routes/friends.js';
 
 dotenv.config();
 
@@ -24,6 +25,7 @@ app.get('/api/health', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/wordme', wordmeRoutes);
 app.use('/api/novidades', novidadesRoutes);
+app.use('/api/friends', friendsRoutes);
 
 const PORT = process.env.PORT || 4000;
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://root:change_me@mongo:27017/games_hub?authSource=admin';

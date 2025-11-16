@@ -4,6 +4,7 @@ import { SiHubspot } from 'react-icons/si';
 import './Sidebar.scss';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import api from '../../api';
+import FriendsPanel from '../FriendsPanel/FriendsPanel';
 
 function clearAllAuthAndRedirect(navigate) {
   localStorage.removeItem('token');
@@ -27,6 +28,7 @@ export default function Sidebar({ onAuthChange }) {
   const [user, setUser] = useState(userFromStorage);
   const [wordmeOpen, setWordmeOpen] = useState(false);
   const [novidadesOpen, setNovidadesOpen] = useState(false);
+  const [friendsOpen, setFriendsOpen] = useState(false);
   const isSuperAdmin = user?.role === 'admin';
 
   useEffect(() => {
@@ -53,10 +55,11 @@ export default function Sidebar({ onAuthChange }) {
   }
 
   return (
-    <aside className="app-sidebar">
-      <Link to="/" className="brand">
-        GamesHub <SiHubspot style={{ fontSize: '1.3em', marginLeft: 9 }} />
-      </Link>
+    <>
+      <aside className="app-sidebar">
+        <Link to="/" className="brand">
+          GamesHub <SiHubspot style={{ fontSize: '1.3em', marginLeft: 9 }} />
+        </Link>
 
       <ul className="nav-list">
         {/* Novidades always on top */}
@@ -170,18 +173,35 @@ export default function Sidebar({ onAuthChange }) {
             <span className="user-name-inline" style={{ color: 'var(--header-fg)' }}>
               {user?.name ?? ''}
             </span>
-            <button
-              type="button"
-              className="avatar-button"
-              aria-label="Sair"
-              title="Sair"
-              onClick={logout}
-            >
-              <i className="bi bi-arrow-bar-right" style={{ fontSize: '1.25rem', color: 'var(--header-fg)' }}></i>
-            </button>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <button
+                type="button"
+                className="avatar-button"
+                aria-label="Amigos"
+                title="Amigos"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setFriendsOpen(!friendsOpen);
+                }}
+              >
+                <i className="bi bi-people-fill" style={{ fontSize: '1.25rem', color: 'var(--header-fg)' }}></i>
+              </button>
+              <button
+                type="button"
+                className="avatar-button"
+                aria-label="Sair"
+                title="Sair"
+                onClick={logout}
+              >
+                <i className="bi bi-arrow-bar-right" style={{ fontSize: '1.25rem', color: 'var(--header-fg)' }}></i>
+              </button>
+            </div>
           </div>
         )}
       </div>
     </aside>
+    <FriendsPanel isOpen={friendsOpen} onClose={() => setFriendsOpen(false)} />
+    </>
   );
 }

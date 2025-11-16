@@ -1,8 +1,9 @@
 .novidades-page {
-  padding: 2rem;
+  padding: 2rem 1rem;
   max-width: 900px;
   margin: 0 auto;
   animation: fadeIn 0.5s ease-out;
+  min-height: calc(100vh - 80px);
 
   .novidades-header {
     text-align: center;
